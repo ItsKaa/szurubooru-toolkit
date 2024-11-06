@@ -15,7 +15,7 @@
                     "#": "Upscale images when the size is too small.",
                     "name": "exec",
                     "filter": "extension in ('jpg', 'jpeg', 'png', 'bmp')",
-                    "command": ["./gallery-dl-upscale.py", "--dir", "{_directory}", "--file", "{_filename}"]
+                    "command": ["./gallery-dl-upscale.py", "--dir", "{_directory}", "--file", "{_filename}", "--sizecheck", "3840", "--cpu"]
                 },
                 {
                     "#": "Extract archive and copy JSON file",
