@@ -186,6 +186,7 @@ def main(urls: list = [], input_file: str = '', add_tags: list = [], verbose: bo
     logger.info(f'Downloaded {len(files)} post(s). Start importing...')
 
     saucenao_limit_reached = False
+    all_success = False
 
     for file in tqdm(
         files,
@@ -220,15 +221,17 @@ def main(urls: list = [], input_file: str = '', add_tags: list = [], verbose: bo
                 metadata['tags'] += add_tags
 
             with open(file, 'rb') as file_b:
-                saucenao_limit_reached = upload_media.main(
+                success, saucenao_limit_reached = upload_media.main(
                     file_to_upload=file_b.read(),
                     file_ext=Path(file).suffix[1:],
                     metadata=metadata,
                     saucenao_limit_reached=saucenao_limit_reached,
                     src_path=file,
                 )
+                if not all_success:
+                    all_success = success
 
-    if os.path.exists(download_dir):
+    if all_success and os.path.exists(download_dir):
         shutil.rmtree(download_dir)
 
     logger.success('Finished importing!')

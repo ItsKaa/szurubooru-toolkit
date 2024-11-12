@@ -388,7 +388,7 @@ def main(
     file_ext: str = None,
     metadata: dict = None,
     saucenao_limit_reached: bool = False,
-) -> int:
+) -> tuple[bool, int]:
     """
     Main logic of the script.
 
@@ -405,12 +405,14 @@ def main(
         saucenao_limit_reached (bool, optional): If the SauceNAO limit has been reached. Defaults to False.
 
     Returns:
+        bool: wether or not all uploads succeeded.
         int: The number of files uploaded.
 
     Raises:
         KeyError: If no files are found to upload and no source path is specified.
     """
-
+    
+    all_success = False
     try:
         if not file_to_upload:
             try:
@@ -459,15 +461,17 @@ def main(
                 if config.upload_media['cleanup'] and not any_failed:
                     cleanup_dirs(config.upload_media['src_path'])  # Remove dirs after files have been deleted
 
+                all_success = not any_failed
                 if not from_import_from:
                     logger.success('Script has finished uploading!')
 
             else:
-                _, saucenao_limit_reached = upload_post(file_to_upload, file_ext, metadata, saucenao_limit_reached=saucenao_limit_reached, file_path=src_path)
+                all_success, saucenao_limit_reached = upload_post(file_to_upload, file_ext, metadata, saucenao_limit_reached=saucenao_limit_reached, file_path=src_path)
 
-            return saucenao_limit_reached
+            return all_success, saucenao_limit_reached
         else:
             logger.info('No files found to upload.')
+            return False, 0
     except KeyboardInterrupt:
         logger.info('Received keyboard interrupt from user.')
         exit(1)
