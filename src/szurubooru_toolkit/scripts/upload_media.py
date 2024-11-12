@@ -432,6 +432,7 @@ def main(
                 except KeyError:
                     hide_progress = config.tag_posts['hide_progress']
 
+                any_failed = False
                 for file_path in tqdm(
                     files_to_upload,
                     ncols=80,
@@ -452,8 +453,10 @@ def main(
                     if config.upload_media['cleanup'] and success:
                         if os.path.exists(file_path):
                             os.remove(file_path)
+                    if not success:
+                        any_failed = True
 
-                if config.upload_media['cleanup']:
+                if config.upload_media['cleanup'] and not any_failed:
                     cleanup_dirs(config.upload_media['src_path'])  # Remove dirs after files have been deleted
 
                 if not from_import_from:
