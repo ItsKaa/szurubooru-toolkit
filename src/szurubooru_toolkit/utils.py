@@ -345,10 +345,17 @@ def generate_src(metadata: dict) -> str:
                 service = metadata['service']
                 src = f'https://kemono.party/{service}/user/{user}/post/{id}'
             case 'fanbox':
-                user = metadata['creatorId']
-                src = f'https://fanbox.cc/@{user}/posts/{id}'
+                user = metadata['user']
+                src = f'https://{user}.fanbox.cc/posts/{id}'
+            case 'pixiv_fanbox':
+                creatorId = metadata['creatorId']
+                src = f'https://www.pixiv.net/fanbox/creator/{creatorId}/post/{id}'
             case 'pixiv':
                 src = 'https://www.pixiv.net/artworks/' + id
+            case 'patreon':
+                src = 'https://www.patreon.com/posts/' + id
+            case 'fantia':
+                src = 'https://fantia.jp/posts/' + id
             case _:
                 src = None
     except KeyError:
@@ -451,12 +458,14 @@ def prepare_post(results: dict, config: Config) -> tuple[list[str], list[str], s
     rating = []
     booru_found = False
     for booru, result in results.items():
-        if booru != 'pixiv':
+        if booru in ['donmai', 'danbooru', 'gelbooru', 'konachan', 'sankakucomplex', 'sankaku', 'yande', 'yandere']:
             tags.append(result[0].tags.split())
             sources.append(generate_src({'site': booru, 'id': result[0].id}))
             rating = convert_rating(result[0].rating)
             booru_found = True
-        else:
+        elif booru == 'patreon' or booru == 'fanbox' or booru == 'pixiv_fanbox' or booru == 'fantia':
+            sources.append(generate_src(result))
+        elif booru == 'pixiv':
             pixiv_tags = None
             if config.credentials['pixiv']['token']:
                 try:

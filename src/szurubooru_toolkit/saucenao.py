@@ -94,6 +94,10 @@ class SauceNao:
             'konachan': None,
             'sankakucomplex': None,
             'pixiv': None,
+            'pixiv_fanbox': None,
+            'fanbox': None,
+            'patreon': None,
+            'fantia': None,
         }
 
         if response and response != 'Limit reached':
@@ -104,21 +108,57 @@ class SauceNao:
                 'yande': 'yandere',
                 'konachan': 'konachan',
                 'sankakucomplex': 'sankaku',
+                'patreon': 'patreon',
+                'fanbox': 'fanbox',
+                'fantia': 'fantia',
             }
 
             for result in response:
                 if result.urls:
-                    for url in result.urls:
+                    urls:list = result.urls
+                    if result.source_url:
+                        urls.append(result.source_url)
+                    for url in urls:
                         site = self.get_base_domain(url)
                         post_id = re.findall(r'\b\d+\b', url)
                         if site in matches and not matches[site]:
                             logger.debug(f'Found result on {site.capitalize()}')
                             if site == 'pixiv':
-                                matches[site] = result
+                                # Handle pixiv.net fanbox links like: https://www.pixiv.net/fanbox/creator/3259336/post/872684
+                                # This way traditional pixiv links can be added alongside the fanbox variations, in case the images are very similar.
+                                if re.findall(r'/fanbox/creator/', url):
+                                    if post_id and len(post_id) == 2 and not matches['fanbox']:
+                                        matches['pixiv_fanbox'] = {'site': site_keys[site], 'creatorId': int(post_id[0]), 'id': int(post_id[1])}
+                                elif result.source_url:
+                                    if post_id:
+                                        # Pixiv source that comes from a booru.
+                                        obj = type('Dummy', (object,), {})
+                                        # pixiv.py get_result expects this formatted link:
+                                        obj.url = f"https://www.pixiv.net/member_illust.php?mode=medium&illust_id={post_id[0]}"
+                                        obj.author_name = None
+                                        matches[site] = obj
+                                else:
+                                    matches[site] = result
+                            elif site == 'fanbox':
+                                # https://www.fanbox.cc/@user
+                                user1 = re.findall(r':\/\/.*fanbox\..*\/@([^\/]+)\/', url)
+                                # https://user.fanbox.cc
+                                # warning: user1 regex must be prioritized, otherwise "www" might match as the user for the user2.
+                                user2 = re.findall(r':\/\/(?:www\.)?(.*)\.fanbox.*', url)
+                                if user1 or user2:
+                                    matches[site] = {'site': site_keys[site], 'user': user1[0] if user1 else user2[0], 'id': int(post_id[0])} if post_id else None
+                                    # drop pixiv_fanbox if it exists because fanbox.cc is a better url link for it than pixiv.net/fanbox/
+                                    matches['pixiv_fanbox'] = None
+                            elif site == 'patreon' or site == 'fantia':
+                                matches[site] = {'site': site_keys[site], 'id': int(post_id[0])} if post_id else None
                             elif site in site_keys:
                                 matches[site] = {'site': site_keys[site], 'post_id': int(post_id[0])} if post_id else None
                             else:
                                 continue
+                elif result.source_url:
+                    site = self.get_base_domain(url)
+
+
 
             logger.debug(f'Limit short: {response.short_remaining}')
             logger.debug(f'Limit long: {response.long_remaining}')
