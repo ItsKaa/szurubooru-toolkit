@@ -42,11 +42,10 @@ def get_saucenao_results(sauce: SauceNao, post: Post, image: bytes) -> tuple[lis
     matches, limit_short, limit_long = asyncio.run(sauce.get_metadata(post.content_url, image))
 
     for index, data in matches.items():
-        if data and index != 'pixiv':
-            results.update(asyncio.run(search_boorus(data['site'], f'id:{str(data["post_id"])}', 1, 0)))
-
-        if data and index == 'pixiv':
+        if data and index not in ['donmai', 'danbooru', 'gelbooru', 'konachan', 'sankakucomplex', 'sankaku', 'yande', 'yandere']:
             results[index] = data
+        elif data:
+            results.update(asyncio.run(search_boorus(data['site'], f'id:{str(data["post_id"])}', 1, 0)))
 
     if not limit_long == 0:
         # Sleep 35 seconds after short limit has been reached
