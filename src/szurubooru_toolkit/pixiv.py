@@ -58,6 +58,10 @@ class Pixiv:
                     result = None
                     logger.debug('Got no result')
                     break
+                except Exception:
+                    result = None
+                    logger.debug("Got unknown exception")
+                    break
             else:
                 result = None
         else:
