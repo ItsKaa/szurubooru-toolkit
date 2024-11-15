@@ -30,7 +30,7 @@ class SauceNao:
             config (Config): The configuration object containing the SauceNao API token and other settings.
         """
 
-        self.pysaucenao = PySauceNao(api_key=config.auto_tagger['saucenao_api_token'], min_similarity=80.0)
+        self.pysaucenao = PySauceNao(api_key=config.auto_tagger['saucenao_api_token'], min_similarity=70.0)
         if not config.auto_tagger['saucenao_api_token'] == 'None':
             logger.debug('Using SauceNAO API token')
 
