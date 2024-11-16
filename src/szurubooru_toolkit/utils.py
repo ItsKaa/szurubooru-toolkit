@@ -248,6 +248,10 @@ def collect_sources(*sources: str) -> str:
                 for duplicate in [item for item in sources if f'pixiv.net/artworks/{post_id[0]}' in item]:
                     sources.remove(duplicate)
 
+    # sort the sources by site priority, see get_metadata and generate_src for the used url formats.
+    sort_order = ['pixiv.net/artworks', 'pixiv.net/member_illust', 'twitter.com', 'patreon.com', 'fanbox.cc', 'fantia.jp', 'pixiv.net/fanbox', 'kemono.party']
+    source_valid.sort(key=lambda source_url: ([idx for idx, url_part in enumerate(sort_order) if url_part in source_url] or [100])[0])
+
     delimiter = '\n'
     source_collected = delimiter.join(source_valid)
     return source_collected
