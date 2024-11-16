@@ -599,6 +599,8 @@ def get_site(url: str) -> str:
         'kemono',
         'fanbox',
         'pixiv',
+        'patreon',
+        'fantia',
     }
 
     for site in sites:
