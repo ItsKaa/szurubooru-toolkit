@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 import subprocess
 import warnings
 from asyncio import sleep
@@ -237,6 +238,15 @@ def collect_sources(*sources: str) -> str:
 
     # Remove duplicates
     source_valid = list(set(sources_sanitized))
+
+    # Remove duplicate pixiv sources if they exist.
+    # There are two different type os pixiv URLs:
+    # https://www.pixiv.net/en/artworks/<ID> and https://www.pixiv.net/member_illust.php?mode=medium&illust_id=<ID>.
+    for url in sources.copy():
+        if 'pixiv.net/member_illust.php' in url:
+            if post_id := re.findall(r'\b\d+\b', url):
+                for duplicate in [item for item in sources if f'pixiv.net/artworks/{post_id[0]}' in item]:
+                    sources.remove(duplicate)
 
     delimiter = '\n'
     source_collected = delimiter.join(source_valid)
@@ -599,6 +609,8 @@ def get_site(url: str) -> str:
         'kemono',
         'fanbox',
         'pixiv',
+        'patreon',
+        'fantia',
     }
 
     for site in sites:

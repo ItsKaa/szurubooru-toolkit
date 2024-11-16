@@ -129,7 +129,7 @@ class SauceNao:
                                 if re.findall(r'/fanbox/creator/', url):
                                     if post_id and len(post_id) == 2 and not matches['fanbox']:
                                         matches['pixiv_fanbox'] = {'site': site_keys[site], 'creatorId': int(post_id[0]), 'id': int(post_id[1])}
-                                elif result.source_url:
+                                elif self.get_base_domain(result.url) != site:
                                     if post_id:
                                         # Pixiv source that comes from a booru.
                                         obj = type('Dummy', (object,), {})
