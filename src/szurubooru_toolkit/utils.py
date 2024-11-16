@@ -242,11 +242,11 @@ def collect_sources(*sources: str) -> str:
     # Remove duplicate pixiv sources if they exist.
     # There are two different type os pixiv URLs:
     # https://www.pixiv.net/en/artworks/<ID> and https://www.pixiv.net/member_illust.php?mode=medium&illust_id=<ID>.
-    for url in sources.copy():
+    for url in source_valid.copy():
         if 'pixiv.net/member_illust.php' in url:
             if post_id := re.findall(r'\b\d+\b', url):
-                for duplicate in [item for item in sources if f'pixiv.net/artworks/{post_id[0]}' in item]:
-                    sources.remove(duplicate)
+                for duplicate in [item for item in source_valid if f'pixiv.net/artworks/{post_id[0]}' in item]:
+                    source_valid.remove(duplicate)
 
     delimiter = '\n'
     source_collected = delimiter.join(source_valid)
