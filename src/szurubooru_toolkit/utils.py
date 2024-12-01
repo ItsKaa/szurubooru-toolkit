@@ -355,7 +355,7 @@ def generate_src(metadata: dict) -> str:
                 service = metadata['service']
                 src = f'https://kemono.party/{service}/user/{user}/post/{id}'
             case 'fanbox':
-                user = metadata['user']
+                user = metadata['creatorId'] if 'creatorId' in metadata else metadata['user']
                 src = f'https://{user}.fanbox.cc/posts/{id}'
             case 'pixiv_fanbox':
                 creatorId = metadata['creatorId']
